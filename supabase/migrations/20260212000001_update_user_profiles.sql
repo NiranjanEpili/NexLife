@@ -1,0 +1,9 @@
+-- Add additional fields to user_profiles table
+ALTER TABLE user_profiles 
+ADD COLUMN IF NOT EXISTS university TEXT,
+ADD COLUMN IF NOT EXISTS major TEXT,
+ADD COLUMN IF NOT EXISTS year_of_study TEXT,
+ADD COLUMN IF NOT EXISTS bio TEXT,
+ADD COLUMN IF NOT EXISTS monthly_budget NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS budget_split TEXT DEFAULT '50-30-20',
+ADD COLUMN IF NOT EXISTS academic_goals TEXT;

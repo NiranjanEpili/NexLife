@@ -13,9 +13,14 @@ import {
   CheckSquare,
   BookOpen,
   ShoppingCart,
+  FileText,
+  Bell,
   LogOut,
   Menu,
-  X
+  X,
+  Moon,
+  Sun,
+  User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -30,7 +35,9 @@ const navItems = [
   { href: '/expenses', label: 'Expenses', icon: DollarSign },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/academics', label: 'Academics', icon: BookOpen },
+  { href: '/notes', label: 'Notes', icon: FileText },
   { href: '/shopping', label: 'Shopping', icon: ShoppingCart },
+  { href: '/reminders', label: 'Reminders', icon: Bell },
 ];
 
 export default function AppLayout({ children }: AppLayoutProps) {
@@ -76,19 +83,56 @@ export default function AppLayout({ children }: AppLayoutProps) {
           </div>
           <div className="flex-shrink-0 flex border-t border-slate-200 dark:border-slate-700 p-4">
             <div className="flex-shrink-0 w-full group block">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
                     {user?.email}
                   </p>
                 </div>
+                <div className="flex gap-1">
+                  <Link href="/profile">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-slate-500 hover:text-blue-600"
+                    >
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={signOut}
+                    className="text-slate-500 hover:text-red-600"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-600 dark:text-slate-400">Theme:</span>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={signOut}
-                  className="text-slate-500 hover:text-red-600"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const root = window.document.documentElement;
+                    const isDark = root.classList.contains('dark');
+                    if (isDark) {
+                      root.classList.remove('dark');
+                      root.classList.add('light');
+                      localStorage.setItem('theme', 'light');
+                    } else {
+                      root.classList.remove('light');
+                      root.classList.add('dark');
+                      localStorage.setItem('theme', 'dark');
+                    }
+                  }}
+                  className="flex-1"
                 >
-                  <LogOut className="h-5 w-5" />
+                  <Sun className="h-3 w-3 mr-1 dark:hidden" />
+                  <Moon className="h-3 w-3 mr-1 hidden dark:block" />
+                  <span className="dark:hidden">Light</span>
+                  <span className="hidden dark:inline">Dark</span>
                 </Button>
               </div>
             </div>
@@ -135,7 +179,38 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   </Link>
                 );
               })}
-              <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-2 space-y-1">
+                <Button
+                  onClick={() => {
+                    const root = window.document.documentElement;
+                    const isDark = root.classList.contains('dark');
+                    if (isDark) {
+                      root.classList.remove('dark');
+                      root.classList.add('light');
+                      localStorage.setItem('theme', 'light');
+                    } else {
+                      root.classList.remove('light');
+                      root.classList.add('dark');
+                      localStorage.setItem('theme', 'dark');
+                    }
+                  }}
+                  variant="ghost"
+                  className="w-full justify-start"
+                >
+                  <Sun className="mr-3 h-5 w-5 dark:hidden" />
+                  <Moon className="mr-3 h-5 w-5 hidden dark:block" />
+                  <span className="dark:hidden">Light Mode</span>
+                  <span className="hidden dark:inline">Dark Mode</span>
+                </Button>
+                <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                  >
+                    <User className="mr-3 h-5 w-5" />
+                    Profile
+                  </Button>
+                </Link>
                 <Button
                   onClick={() => {
                     signOut();

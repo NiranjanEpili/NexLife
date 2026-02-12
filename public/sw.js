@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nexlife-v1';
+const CACHE_NAME = 'nexlife-v2';
 const urlsToCache = [
   '/',
   '/dashboard',
@@ -7,6 +7,9 @@ const urlsToCache = [
   '/expenses',
   '/academics',
   '/shopping',
+  '/notes',
+  '/reminders',
+  '/profile',
   '/manifest.json',
 ];
 
