@@ -135,6 +135,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   </Link>
                 );
               })}
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
+                <Button
+                  onClick={() => {
+                    signOut();
+                    setMobileMenuOpen(false);
+                  }}
+                  variant="ghost"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                >
+                  <LogOut className="mr-3 h-5 w-5" />
+                  Logout
+                </Button>
+              </div>
             </nav>
           </div>
         )}

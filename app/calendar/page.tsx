@@ -73,7 +73,7 @@ export default function CalendarPage() {
       if (!accessToken) {
         toast({
           title: 'Google Calendar not connected',
-          description: 'Please sign in with Google to sync events',
+          description: 'Please logout and sign in with Google again to enable calendar sync',
           variant: 'destructive',
         });
         return null;
@@ -407,11 +407,15 @@ export default function CalendarPage() {
                   return (
                     <div
                       key={day.toString()}
-                      onClick={() => setSelectedDate(day)}
+                      onClick={() => {
+                        setSelectedDate(day);
+                        setDialogOpen(true);
+                        resetForm();
+                      }}
                       className={`min-h-28 p-3 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
                         isCurrentMonth
                           ? 'bg-gradient-to-br from-white to-pink-50 dark:from-slate-800 dark:to-pink-950/20 border-pink-200 dark:border-pink-900 shadow-md hover:shadow-xl'
-                          : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-50'
+                          : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-70 hover:opacity-100'
                       } ${isToday ? 'ring-4 ring-pink-500 ring-offset-2 shadow-2xl' : ''}`}
                     >
                       <div className={`text-sm font-medium mb-1 ${isToday ? 'text-blue-600 dark:text-blue-400' : ''}`}>
