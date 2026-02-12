@@ -61,7 +61,7 @@ export default function NotesPage() {
       setNotes(data || []);
 
       // Extract unique folders
-      const uniqueFolders = [...new Set(data?.map(note => note.folder) || [])];
+      const uniqueFolders = Array.from(new Set(data?.map(note => note.folder) || []));
       setFolders(['General', 'Study', 'Personal', 'Ideas', ...uniqueFolders.filter(f => !['General', 'Study', 'Personal', 'Ideas'].includes(f))]);
     } catch (error) {
       console.error('Error loading notes:', error);
