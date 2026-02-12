@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, Trash2, Edit2, ChevronLeft, ChevronRight, Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
@@ -24,7 +24,6 @@ interface CalendarEvent {
   start_time: string;
   end_time: string;
   color: string;
-  google_event_id?: string;
 }
 
 export default function CalendarPage() {
@@ -35,8 +34,6 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
-  const [syncingWithGoogle, setSyncingWithGoogle] = useState(false);
-  const [googleConnected, setGoogleConnected] = useState(false);
   const [viewMode, setViewMode] = useState<'all' | 'today' | 'routine'>('all');
   const [formData, setFormData] = useState({
     title: '',
@@ -44,98 +41,13 @@ export default function CalendarPage() {
     start_time: '',
     end_time: '',
     color: '#3b82f6',
-    syncToGoogle: true,
   });
 
   useEffect(() => {
     if (user) {
       loadEvents();
-      checkGoogleConnection();
     }
   }, [user, currentDate]);
-
-  const checkGoogleConnection = async () => {
-    try {
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.provider_token) {
-        setGoogleConnected(true);
-      }
-    } catch (error) {
-      console.error('Error checking Google connection:', error);
-    }
-  };
-
-  const syncToGoogleCalendar = async (event: any) => {
-    try {
-      const { data } = await supabase.auth.getSession();
-      const accessToken = data.session?.provider_token;
-
-      if (!accessToken) {
-        toast({
-          title: 'Google Calendar not connected',
-          description: 'Please logout and sign in with Google again to enable calendar sync',
-          variant: 'destructive',
-        });
-        return null;
-      }
-
-      const googleEvent = {
-        summary: event.title,
-        description: event.description,
-        start: {
-          dateTime: new Date(event.start_time).toISOString(),
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        end: {
-          dateTime: new Date(event.end_time).toISOString(),
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        colorId: '1',
-      };
-
-      const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(googleEvent),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to sync with Google Calendar');
-      }
-
-      const googleEventData = await response.json();
-      return googleEventData.id;
-    } catch (error) {
-      console.error('Error syncing to Google Calendar:', error);
-      toast({
-        title: 'Sync failed',
-        description: 'Could not sync event to Google Calendar',
-        variant: 'destructive',
-      });
-      return null;
-    }
-  };
-
-  const deleteFromGoogleCalendar = async (googleEventId: string) => {
-    try {
-      const { data } = await supabase.auth.getSession();
-      const accessToken = data.session?.provider_token;
-
-      if (!accessToken || !googleEventId) return;
-
-      await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${googleEventId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      });
-    } catch (error) {
-      console.error('Error deleting from Google Calendar:', error);
-    }
-  };
 
   const loadEvents = async () => {
     try {
@@ -159,61 +71,41 @@ export default function CalendarPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSyncingWithGoogle(true);
 
     try {
-      let googleEventId = null;
-
-      // Sync to Google Calendar if enabled
-      if (formData.syncToGoogle && googleConnected) {
-        googleEventId = await syncToGoogleCalendar(formData);
-      }
-
       if (editingEvent) {
-        const updateData: any = {
-          title: formData.title,
-          description: formData.description,
-          start_time: formData.start_time,
-          end_time: formData.end_time,
-          color: formData.color,
-        };
-
-        if (googleEventId) {
-          updateData.google_event_id = googleEventId;
-        }
-
         const { error } = await supabase
           .from('calendar_events')
-          .update(updateData)
+          .update({
+            title: formData.title,
+            description: formData.description,
+            start_time: formData.start_time,
+            end_time: formData.end_time,
+            color: formData.color,
+          })
           .eq('id', editingEvent.id);
 
         if (error) throw error;
         toast({ 
           title: 'Success', 
-          description: googleEventId ? 'Event updated and synced to Google Calendar ✅' : 'Event updated successfully'
+          description: 'Event updated successfully'
         });
       } else {
-        const insertData: any = {
-          title: formData.title,
-          description: formData.description,
-          start_time: formData.start_time,
-          end_time: formData.end_time,
-          color: formData.color,
-          user_id: user?.id,
-        };
-
-        if (googleEventId) {
-          insertData.google_event_id = googleEventId;
-        }
-
         const { error } = await supabase
           .from('calendar_events')
-          .insert(insertData);
+          .insert({
+            title: formData.title,
+            description: formData.description,
+            start_time: formData.start_time,
+            end_time: formData.end_time,
+            color: formData.color,
+            user_id: user?.id,
+          });
 
         if (error) throw error;
         toast({ 
           title: 'Success', 
-          description: googleEventId ? 'Event created and synced to Google Calendar 🎉' : 'Event created successfully'
+          description: 'Event created successfully'
         });
       }
 
@@ -227,8 +119,6 @@ export default function CalendarPage() {
         description: 'Failed to save event',
         variant: 'destructive',
       });
-    } finally {
-      setSyncingWithGoogle(false);
     }
   };
 
@@ -236,24 +126,13 @@ export default function CalendarPage() {
     if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      // Find event to get Google event ID
-      const event = events.find(e => e.id === id);
-      
-      // Delete from Google Calendar if synced
-      if (event?.google_event_id) {
-        await deleteFromGoogleCalendar(event.google_event_id);
-      }
-
       const { error } = await supabase
         .from('calendar_events')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
-      toast({ 
-        title: 'Success', 
-        description: event?.google_event_id ? 'Event deleted from NexLife and Google Calendar' : 'Event deleted successfully'
-      });
+      toast({ title: 'Success', description: 'Event deleted successfully' });
       loadEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
@@ -278,7 +157,6 @@ export default function CalendarPage() {
       start_time: startTime.toISOString().slice(0, 16),
       end_time: endTime.toISOString().slice(0, 16),
       color: '#3b82f6',
-      syncToGoogle: true,
     });
     setEditingEvent(null);
   };
@@ -291,7 +169,6 @@ export default function CalendarPage() {
       start_time: new Date(event.start_time).toISOString().slice(0, 16),
       end_time: new Date(event.end_time).toISOString().slice(0, 16),
       color: event.color,
-      syncToGoogle: !!event.google_event_id,
     });
     setDialogOpen(true);
   };
@@ -319,12 +196,6 @@ export default function CalendarPage() {
                 </p>
               </div>
               <div className="flex gap-3 flex-wrap">
-                {googleConnected && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/30 backdrop-blur-sm border border-white">
-                    <CalendarIcon className="h-4 w-4 text-white" />
-                    <span className="text-xs font-semibold text-white">Google Calendar Connected ✓</span>
-                  </div>
-                )}
                 <Button 
                   onClick={() => setViewMode('all')} 
                   variant="outline" 
@@ -456,7 +327,6 @@ export default function CalendarPage() {
                 </DialogTitle>
                 <DialogDescription>
                   {editingEvent ? 'Update your event details' : 'Create a new calendar event'}
-                  {googleConnected && <span className="text-green-600 font-semibold ml-2">• Syncs with Google Calendar</span>}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit}>
@@ -529,22 +399,6 @@ export default function CalendarPage() {
                       </div>
                     </div>
                   </div>
-                  
-                  {googleConnected && (
-                    <div className="flex items-center space-x-2 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border border-blue-200 dark:border-blue-800">
-                      <input
-                        type="checkbox"
-                        id="syncToGoogle"
-                        checked={formData.syncToGoogle}
-                        onChange={(e) => setFormData({ ...formData, syncToGoogle: e.target.checked })}
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
-                      <label htmlFor="syncToGoogle" className="text-sm font-medium cursor-pointer flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4" />
-                        Sync this event to Google Calendar
-                      </label>
-                    </div>
-                  )}
                 </div>
                 <DialogFooter className="mt-6 gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
@@ -565,19 +419,9 @@ export default function CalendarPage() {
                   )}
                   <Button 
                     type="submit" 
-                    disabled={syncingWithGoogle}
                     className="bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold"
                   >
-                    {syncingWithGoogle ? (
-                      <>
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                        Syncing...
-                      </>
-                    ) : (
-                      <>
-                        {editingEvent ? 'Update' : 'Create'} Event
-                      </>
-                    )}
+                    {editingEvent ? 'Update' : 'Create'} Event
                   </Button>
                 </DialogFooter>
               </form>
