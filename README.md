@@ -106,6 +106,81 @@
 
 </td>
 </tr>
+
+<tr>
+<td width="50%">
+
+### 📝 **Notes**
+```
+✓ Markdown Support
+✓ Folder Organization
+✓ Search & Filter
+✓ Favorite Notes
+```
+
+</td>
+<td width="50%">
+
+### ⏰ **Reminders**
+```
+✓ Browser Notifications
+✓ Email Notifications
+✓ Recurring Reminders
+✓ Category Organization
+```
+
+</td>
+</tr>
+
+<tr>
+<td width="50%">
+
+### 👤 **Profile**
+```
+✓ Academic Settings
+✓ Budget Management
+✓ Activity Stats
+✓ Personal Info
+```
+
+</td>
+<td width="50%">
+
+### 🎯 **Onboarding**
+```
+✓ 4-Step Setup Flow
+✓ Budget Calculator
+✓ Academic Details
+✓ Goal Setting
+```
+
+</td>
+</tr>
+
+<tr>
+<td width="50%">
+
+### 🌙 **Dark Mode**
+```
+✓ Theme Toggle
+✓ Persistent Storage
+✓ System Preference
+✓ Smooth Transitions
+```
+
+</td>
+<td width="50%">
+
+### 📱 **PWA Support**
+```
+✓ Offline Capable
+✓ Install to Home
+✓ Service Worker
+✓ App Manifest
+```
+
+</td>
+</tr>
 </table>
 
 <div align="center">
@@ -182,14 +257,21 @@ Create a `.env` file in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+RESEND_API_KEY=your_resend_api_key
 ```
+
+**Optional:** For email notifications, sign up at [Resend](https://resend.com) and add your API key.
 
 ### 4️⃣ Set up Supabase Database
 
 1. Go to your Supabase Dashboard
 2. Navigate to SQL Editor
-3. Copy the content from `supabase/migrations/20260210171839_create_nexlife_schema.sql`
-4. Paste and run the SQL to create all tables
+3. Run the following migrations in order:
+   - `20260210171839_create_nexlife_schema.sql` - Main tables
+   - `20260212000000_create_notes_reminders.sql` - Notes & Reminders
+   - `20260212000001_update_user_profiles.sql` - Profile enhancements
+   - `20260212000002_add_onboarding_field.sql` - Onboarding flag
+   - `20260212000003_fix_rls_performance.sql` - RLS optimization
 
 ### 5️⃣ Configure Google OAuth (Optional)
 
@@ -220,45 +302,73 @@ Open [http://localhost:3000](http://localhost:3000) to see your application.
 ┃ ┣ 📂 dashboard              # 🏠 Main dashboard
 ┃ ┣ 📂 expenses               # 💰 Expense tracking
 ┃ ┣ 📂 login                  # 🔐 Login page
-┃ ┣ 📂 signup                 # ✍️ Signup page
-┃ ┣ 📂 tasks                  # ✅ Task management
-┃ ┣ 📂 shopping               # 🛒 Shopping lists
+┃ ┣ 📂 notes                  # 📝 Notes with folders
+┃ ┣ 📂 reminders              # ⏰ Reminders & notifications
+┃ ┣ 📂 profile                # 👤 User profile
+┃ ┣ 📂 onboarding             # 🎯 First-time setup
+┃ ┣ 📂 api                    # API routes
+┃ ┃ ┗ 📂 send-reminder        # 📧 Email notifications
 ┃ ┗ 📜 layout.tsx             # Root layout
 ┣ 📂 components               # React components
 ┃ ┣ 📂 layout                 # Layout components
 ┃ ┗ 📂 ui                     # UI components (Radix)
 ┣ 📂 contexts                 # React contexts
-┃ ┗ 📜 AuthContext.tsx        # Authentication
+┃ ┣ 📜 AuthContext.tsx        # Authentication
+┃ ┗ 📜 ThemeContext.tsx       # Dark mode theme
 ┣ 📂 lib                      # Utilities
 ┃ ┣ 📂 supabase               # Supabase client
 ┃ ┗ 📜 utils.ts               # Helpers
+┣ 📂 public                   # Static assets
+┃ ┣ 📜 manifest.json          # PWA manifest
+┃ ┗ 📜 sw.js                  # Service worker
+┗ 📂 supabase                 # Database & functions
+  ┣ 📂 migrations             # SQL migrations
+  ┗ 📂 functions              # Edge func
 ┣ 📂 public                   # Static assets
 ┗ 📂 supabase                 # Database migrations
   ┗ 📂 migrations             # SQL migrations
 ```
 
----
-
-## 🗄️ Database Schema
-
-<div align="center">
-
-```mermaid
-erDiagram
-    USER_PROFILES ||--o{ TASKS : creates
-    USER_PROFILES ||--o{ EXPENSES : records
-    USER_PROFILES ||--o{ CALENDAR_EVENTS : schedules
-    USER_PROFILES ||--o{ ACADEMICS : manages
-    USER_PROFILES ||--o{ SHOPPING_LISTS : owns
+---USER_PROFILES ||--o{ NOTES : writes
+    USER_PROFILES ||--o{ REMINDERS : sets
     SHOPPING_LISTS ||--o{ SHOPPING_ITEMS : contains
     
     USER_PROFILES {
         uuid id PK
         text email
         text full_name
-        text theme_preference
+        text university
+        text major
+        int year_of_study
+        numeric monthly_budget
+        jsonb budget_split
+        boolean onboarding_completed
     }
     
+    TASKS {
+        uuid id PK
+        uuid user_id FK
+        text title
+        text priority
+        text status
+        timestamptz due_date
+    }
+    
+    NOTES {
+        uuid id PK
+        uuid user_id FK
+        text title
+        text content
+        text folder
+        boolean is_favorite
+    }
+    
+    REMINDERS {
+        uuid id PK
+        uuid user_id FK
+        text title
+        timestamptz reminder_date
+        boolean is_recurring
     TASKS {
         uuid id PK
         uuid user_id FK
