@@ -192,17 +192,19 @@ export default function AcademicsPage() {
     <ProtectedRoute>
       <AppLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Academics</h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Manage your study materials and progress
-              </p>
+          <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-black text-white drop-shadow-lg">📚 Academics</h1>
+                <p className="text-amber-100 mt-1 text-lg">
+                  Organize your study materials
+                </p>
+              </div>
+              <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="bg-white text-orange-600 hover:bg-orange-50 font-bold shadow-lg">
+                <Plus className="mr-2 h-5 w-5" />
+                Add Material
+              </Button>
             </div>
-            <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Study Material
-            </Button>
           </div>
 
           {loading ? (

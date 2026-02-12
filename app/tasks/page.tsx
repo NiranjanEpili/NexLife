@@ -188,17 +188,19 @@ export default function TasksPage() {
     <ProtectedRoute>
       <AppLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Tasks</h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Manage your tasks and priorities
-              </p>
+          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-black text-white drop-shadow-lg">✅ Tasks</h1>
+                <p className="text-indigo-100 mt-1 text-lg">
+                  Manage your tasks and priorities
+                </p>
+              </div>
+              <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="bg-white text-purple-600 hover:bg-purple-50 font-bold shadow-lg">
+                <Plus className="mr-2 h-5 w-5" />
+                Add Task
+              </Button>
             </div>
-            <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Task
-            </Button>
           </div>
 
           <div className="flex items-center gap-4">

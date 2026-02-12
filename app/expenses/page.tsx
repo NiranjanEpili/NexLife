@@ -124,8 +124,8 @@ export default function ExpensesPage() {
     const ratios = budgetRatio.split('/').map(Number);
 
     return {
-      needs: (income * ratios[0]) / 100,
-      wants: (income * ratios[1]) / 100,
+      usableMoney: (income * ratios[0]) / 100,
+      investment: (income * ratios[1]) / 100,
       savings: (income * ratios[2]) / 100,
     };
   };
@@ -146,22 +146,24 @@ export default function ExpensesPage() {
     <ProtectedRoute>
       <AppLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Expenses & Investments</h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Track your financial transactions
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setBudgetDialogOpen(true)}>
-                <PieChart className="mr-2 h-4 w-4" />
-                Budget Calculator
-              </Button>
-              <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Transaction
-              </Button>
+          <div className="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-black text-white drop-shadow-lg">💰 Expenses & Investments</h1>
+                <p className="text-emerald-100 mt-1 text-lg">
+                  Track your financial transactions
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setBudgetDialogOpen(true)} className="bg-white/20 text-white border-white hover:bg-white hover:text-green-600 font-bold">
+                  <PieChart className="mr-2 h-4 w-4" />
+                  Budget
+                </Button>
+                <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="bg-white text-green-600 hover:bg-green-50 font-bold shadow-lg">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Add Transaction
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -356,58 +358,91 @@ export default function ExpensesPage() {
           </Dialog>
 
           <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
-            <DialogContent>
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Budget Calculator</DialogTitle>
-                <DialogDescription>Calculate your budget based on income</DialogDescription>
+                <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                  💰 Smart Budget Calculator
+                </DialogTitle>
+                <DialogDescription>Plan your finances with intelligent budgeting</DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="income">Monthly Income</Label>
-                  <Input
-                    id="income"
-                    type="number"
-                    step="0.01"
-                    value={monthlyIncome}
-                    onChange={(e) => setMonthlyIncome(e.target.value)}
-                    placeholder="Enter your monthly income"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="ratio">Budget Ratio</Label>
-                  <Select value={budgetRatio} onValueChange={setBudgetRatio}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="50/30/20">50/30/20 (Needs/Wants/Savings)</SelectItem>
-                      <SelectItem value="60/30/10">60/30/10 (Needs/Wants/Savings)</SelectItem>
-                      <SelectItem value="70/20/10">70/20/10 (Needs/Wants/Savings)</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="income" className="font-semibold">Monthly Income (₹)</Label>
+                    <Input
+                      id="income"
+                      type="number"
+                      step="0.01"
+                      value={monthlyIncome}
+                      onChange={(e) => setMonthlyIncome(e.target.value)}
+                      placeholder="Enter your monthly income"
+                      className="mt-2 text-lg font-bold"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="ratio" className="font-semibold">Budget Strategy</Label>
+                    <Select value={budgetRatio} onValueChange={setBudgetRatio}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="50/30/20">50/30/20 (Usable/Investment/Savings)</SelectItem>
+                        <SelectItem value="60/30/10">60/30/10 (Usable/Investment/Savings)</SelectItem>
+                        <SelectItem value="70/20/10">70/20/10 (Usable/Investment/Savings)</SelectItem>
+                        <SelectItem value="40/40/20">40/40/20 (Usable/Investment/Savings)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 {budget && (
-                  <div className="space-y-3 pt-4 border-t">
-                    <h3 className="font-semibold">Your Budget Breakdown:</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Needs ({budgetRatio.split('/')[0]}%)</span>
-                        <span className="font-bold">₹{budget.needs.toFixed(2)}</span>
+                  <div className="space-y-4 pt-4">
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      📊 Your Budget Breakdown
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+                        <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">
+                          💵 Usable Money ({budgetRatio.split('/')[0]}%)
+                        </p>
+                        <p className="text-3xl font-black text-blue-600 dark:text-blue-400">
+                          ₹{budget.usableMoney.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">For daily expenses</p>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Wants ({budgetRatio.split('/')[1]}%)</span>
-                        <span className="font-bold">₹{budget.wants.toFixed(2)}</span>
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-2 border-purple-200 dark:border-purple-800 shadow-lg">
+                        <p className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1">
+                          📈 Investment ({budgetRatio.split('/')[1]}%)
+                        </p>
+                        <p className="text-3xl font-black text-purple-600 dark:text-purple-400">
+                          ₹{budget.investment.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">Grow your wealth</p>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Savings ({budgetRatio.split('/')[2]}%)</span>
-                        <span className="font-bold">₹{budget.savings.toFixed(2)}</span>
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950 dark:to-emerald-900 border-2 border-green-200 dark:border-green-800 shadow-lg">
+                        <p className="text-sm font-semibold text-green-700 dark:text-green-300 mb-1">
+                          🏦 Savings ({budgetRatio.split('/')[2]}%)
+                        </p>
+                        <p className="text-3xl font-black text-green-600 dark:text-green-400">
+                          ₹{budget.savings.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">Emergency fund</p>
                       </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950 dark:to-yellow-950 border-2 border-amber-300 dark:border-amber-700">
+                      <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2">💡 Smart Tips</p>
+                      <ul className="text-xs space-y-1 text-amber-700 dark:text-amber-300">
+                        <li>• Track every expense to stay within your usable money budget</li>
+                        <li>• Consider SIPs or mutual funds for your investment allocation</li>
+                        <li>• Build an emergency fund worth 6 months of expenses</li>
+                      </ul>
                     </div>
                   </div>
                 )}
               </div>
               <DialogFooter>
-                <Button onClick={() => setBudgetDialogOpen(false)}>Close</Button>
+                <Button onClick={() => setBudgetDialogOpen(false)} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold">
+                  Close
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

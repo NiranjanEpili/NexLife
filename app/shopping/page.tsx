@@ -215,17 +215,19 @@ export default function ShoppingPage() {
     <ProtectedRoute>
       <AppLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Shopping Lists</h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Organize your shopping items
-              </p>
+          <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-black text-white drop-shadow-lg">🛒 Shopping Lists</h1>
+                <p className="text-cyan-100 mt-1 text-lg">
+                  Organize your shopping items
+                </p>
+              </div>
+              <Button onClick={() => setListDialogOpen(true)} className="bg-white text-blue-600 hover:bg-blue-50 font-bold shadow-lg">
+                <Plus className="mr-2 h-5 w-5" />
+                New List
+              </Button>
             </div>
-            <Button onClick={() => setListDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              New List
-            </Button>
           </div>
 
           <div className="grid gap-6 md:grid-cols-12">

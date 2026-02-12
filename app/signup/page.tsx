@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Chrome } from 'lucide-react';
+import { Logo } from '@/components/ui/logo';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -61,14 +62,20 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-            NexLife
-          </CardTitle>
-          <CardDescription className="text-center">
-            Create your account to get started
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 via-teal-500 to-blue-500 p-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute w-96 h-96 bg-white/10 rounded-full blur-3xl top-10 -left-20 animate-pulse"></div>
+        <div className="absolute w-96 h-96 bg-teal-400/10 rounded-full blur-3xl bottom-10 -right-20 animate-pulse delay-1000"></div>
+      </div>
+      
+      <Card className="w-full max-w-md shadow-2xl border-0 relative backdrop-blur-sm bg-white/95 dark:bg-slate-900/95">
+        <CardHeader className="space-y-3 text-center pb-6">
+          <div className="flex justify-center">
+            <Logo size="lg" />
+          </div>
+          <CardDescription className="text-base font-medium">
+            Create your account to get started 🚀
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSignUp}>
