@@ -119,14 +119,32 @@ export default function RemindersPage() {
         if (error) throw error;
         toast({ title: 'Success', description: 'Reminder updated successfully' });
       } else {
-        const { error } = await supabase
+        const { data: newReminder, error } = await supabase
           .from('reminders')
           .insert({
             ...formData,
             user_id: user?.id,
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
+
+        // Send email notification
+        try {
+          await fetch('/api/send-reminder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user?.email,
+              reminder: newReminder,
+            }),
+          });
+        } catch (emailError) {
+          console.error('Failed to send email:', emailError);
+          // Don't fail the reminder creation if email fails
+        }
+
         toast({ title: 'Success', description: 'Reminder created successfully' });
       }
 
